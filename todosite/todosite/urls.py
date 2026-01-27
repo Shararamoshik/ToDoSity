@@ -19,5 +19,5 @@ from django.urls import path, include
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', include('todo.urls')),  # Все пути из todo теперь на главной
+    path('', include('todo.urls')),
 ]
