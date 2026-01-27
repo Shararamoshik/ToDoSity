@@ -4,6 +4,9 @@ from .forms import TaskForm
 from .models import Task
 
 # Create your views here.
+def main_view(request):
+    return render(request, 'main/main.html')
+
 @login_required
 def task_list(request):
     tasks = Task.objects.filter(user=request.user)

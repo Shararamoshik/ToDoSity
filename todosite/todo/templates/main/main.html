@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TaskFlow - Управление задачами</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <style>
+        :root {
+            --primary: #4361ee;
+            --primary-light: #4895ef;
+            --secondary: #f8f9fa;
+            --dark: #212529;
+            --light: #f8f9fa;
+            --border: #e9ecef;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            color: var(--dark);
+            line-height: 1.6;
+        }
+
+        .navbar {
+            background: white;
+            padding: 1rem 0;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+
+        .logo {
+            color: var(--primary);
+            font-weight: 700;
+            font-size: 1.5rem;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .hero {
+            padding: 6rem 0 4rem;
+            background: linear-gradient(135deg, #f5f7ff 0%, #f0f4ff 100%);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -10%;
+            width: 60%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(67, 97, 238, 0.08) 0%, transparent 70%);
+        }
+
+        .hero h1 {
+            font-weight: 700;
+            font-size: 3rem;
+            margin-bottom: 1.5rem;
+            line-height: 1.2;
+        }
+
+        .hero-lead {
+            font-size: 1.2rem;
+            color: #495057;
+            margin-bottom: 2rem;
+            max-width: 600px;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            border: none;
+            padding: 0.8rem 2rem;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-light);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(67, 97, 238, 0.2);
+        }
+
+        .btn-outline-primary {
+            border: 2px solid var(--primary);
+            color: var(--primary);
+            padding: 0.8rem 2rem;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .btn-outline-primary:hover {
+            background: var(--primary);
+            color: white;
+        }
+
+        .section-title {
+            font-weight: 700;
+            margin-bottom: 1rem;
+            position: relative;
+            padding-bottom: 0.5rem;
+        }
+
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 60px;
+            height: 4px;
+            background: var(--primary);
+            border-radius: 2px;
+        }
+
+        .section-subtitle {
+            color: #6c757d;
+            margin-bottom: 3rem;
+            max-width: 700px;
+        }
+
+        .features {
+            padding: 5rem 0;
+            background: white;
+        }
+
+        .feature-card {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            height: 100%;
+            border: 1px solid var(--border);
+            transition: all 0.3s ease;
+        }
+
+        .feature-card:hover {
+            border-color: var(--primary);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+            transform: translateY(-5px);
+        }
+
+        .feature-icon {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, rgba(67, 97, 238, 0.1) 0%, rgba(67, 97, 238, 0.05) 100%);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .feature-icon i {
+            font-size: 1.5rem;
+            color: var(--primary);
+        }
+
+        .demo-section {
+            padding: 5rem 0;
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        }
+
+        .demo-card {
+            background: white;
+            border-radius: 12px;
+            padding: 2.5rem;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+        }
+
+        .preview {
+            background: white;
+            border-radius: 8px;
+            padding: 1.5rem;
+            border: 1px solid var(--border);
+            margin-bottom: 1.5rem;
+        }
+
+        .task-item {
+            padding: 0.75rem 0;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .task-item:last-child {
+            border-bottom: none;
+        }
+
+        .badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .badge-high {
+            background: #ffeaea;
+            color: #dc3545;
+        }
+
+        .badge-medium {
+            background: #fff3cd;
+            color: #ffc107;
+        }
+
+        footer {
+            padding: 3rem 0;
+            background: var(--dark);
+            color: white;
+        }
+
+        .footer-links a {
+            color: #adb5bd;
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .footer-links a:hover {
+            color: white;
+        }
+
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 2.5rem;
+            }
+
+            .hero {
+                padding: 4rem 0 3rem;
+            }
+
+            .features, .demo-section {
+                padding: 3rem 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Навигация -->
+    <nav class="navbar sticky-top">
+        <div class="container">
+            <div class="d-flex justify-content-between align-items-center w-100">
+                <a href="/" class="logo">
+                    <i class="bi bi-check2-circle"></i>
+                    <span>TaskFlow</span>
+                </a>
+
+                <div class="d-flex align-items-center gap-3">
+                    {% if user.is_authenticated %}
+                        <span class="text-muted">Привет, {{ user.username }}!</span>
+                        <a href="{% url 'logout' %}" class="btn btn-outline-primary btn-sm">Выйти</a>
+                    {% else %}
+                        <a href="{% url 'login' %}" class="btn btn-primary">Войти</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Герой-секция -->
+    <section class="hero">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-lg-6">
+                    <h1>Управляйте задачами эффективно</h1>
+                    <p class="hero-lead">
+                        TaskFlow помогает организовать работу, расставить приоритеты
+                        и ничего не упустить. Простой интерфейс, мощные возможности.
+                    </p>
+
+                    <div class="d-flex flex-wrap gap-3 mb-4">
+                        {% if user.is_authenticated %}
+                            <a href="/tasks/" class="btn btn-primary btn-lg">
+                                <i class="bi bi-arrow-right me-2"></i>К моим задачам
+                            </a>
+                        {% else %}
+                            <a href="{% url 'login' %}" class="btn btn-primary btn-lg">
+                                <i class="bi bi-rocket-takeoff me-2"></i>Начать использовать
+                            </a>
+                            <a href="#demo" class="btn btn-outline-primary btn-lg">
+                                Попробовать демо
+                            </a>
+                        {% endif %}
+                    </div>
+
+                    <div class="d-flex align-items-center gap-4 text-muted">
+                        <div class="d-flex align-items-center">
+                            <i class="bi bi-check-circle text-success me-2"></i>
+                            <span>Бесплатно</span>
+                        </div>
+                        <div class="d-flex align-items-center">
+                            <i class="bi bi-check-circle text-success me-2"></i>
+                            <span>Просто в использовании</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-6 mt-5 mt-lg-0">
+                    <div class="preview">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h5 class="mb-0 fw-bold">Мои задачи</h5>
+                            <button class="btn btn-primary btn-sm">+ Добавить</button>
+                        </div>
+
+                        <div class="task-list">
+                            <div class="task-item">
+                                <i class="bi bi-circle text-success"></i>
+                                <div class="flex-grow-1">
+                                    <div class="fw-medium">Завершить отчет по проекту</div>
+                                    <small class="text-muted">Сегодня, 18:00</small>
+                                </div>
+                                <span class="badge badge-high">Высокий</span>
+                            </div>
+
+                            <div class="task-item">
+                                <i class="bi bi-circle text-warning"></i>
+                                <div class="flex-grow-1">
+                                    <div class="fw-medium">Подготовить презентацию</div>
+                                    <small class="text-muted">Завтра, 10:00</small>
+                                </div>
+                                <span class="badge badge-medium">Средний</span>
+                            </div>
+
+                            <div class="task-item">
+                                <i class="bi bi-circle text-secondary"></i>
+                                <div class="flex-grow-1">
+                                    <div class="fw-medium">Обновить контакты</div>
+                                    <small class="text-muted">На этой неделе</small>
+                                </div>
+                                <span class="badge bg-secondary">Низкий</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Особенности -->
+    <section class="features">
+        <div class="container">
+            <div class="text-center mb-5">
+                <h2 class="section-title text-center">Что умеет TaskFlow</h2>
+                <p class="section-subtitle text-center mx-auto">
+                    Все необходимые инструменты для организации работы и повышения продуктивности
+                </p>
+            </div>
+
+            <div class="row g-4">
+                <div class="col-md-6 col-lg-4">
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="bi bi-list-task"></i>
+                        </div>
+                        <h4 class="fw-bold mb-3">Управление задачами</h4>
+                        <p class="text-muted mb-0">
+                            Создавайте, редактируйте и организуйте задачи.
+                            Расставляйте приоритеты и устанавливайте сроки выполнения.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="col-md-6 col-lg-4">
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="bi bi-tags"></i>
+                        </div>
+                        <h4 class="fw-bold mb-3">Категории и метки</h4>
+                        <p class="text-muted mb-0">
+                            Сортируйте задачи по категориям и меткам.
+                            Находите нужное мгновенно с помощью фильтров.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="col-md-6 col-lg-4">
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="bi bi-bell"></i>
+                        </div>
+                        <h4 class="fw-bold mb-3">Напоминания</h4>
+                        <p class="text-muted mb-0">
+                            Никогда не пропускайте дедлайны.
+                            Получайте уведомления о приближающихся задачах.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="col-md-6 col-lg-4">
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="bi bi-search"></i>
+                        </div>
+                        <h4 class="fw-bold mb-3">Быстрый поиск</h4>
+                        <p class="text-muted mb-0">
+                            Мгновенно находите задачи по названию,
+                            описанию или меткам. Экономьте время.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="col-md-6 col-lg-4">
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="bi bi-lock"></i>
+                        </div>
+                        <h4 class="fw-bold mb-3">Конфиденциальность</h4>
+                        <p class="text-muted mb-0">
+                            Ваши данные защищены. Только вы имеете доступ
+                            к своим задачам и заметкам.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="col-md-6 col-lg-4">
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="bi bi-phone"></i>
+                        </div>
+                        <h4 class="fw-bold mb-3">Доступ с любого устройства</h4>
+                        <p class="text-muted mb-0">
+                            Работайте на компьютере, планшете или телефоне.
+                            Всегда актуальные данные.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Демо-секция -->
+    <section id="demo" class="demo-section">
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-lg-8">
+                    <div class="demo-card">
+                        <div class="text-center mb-4">
+                            <h2 class="section-title text-center">Попробуйте прямо сейчас</h2>
+                            <p class="section-subtitle text-center mx-auto">
+                                Используйте тестовый аккаунт, чтобы оценить все возможности
+                            </p>
+                        </div>
+
+                        <div class="row g-4">
+                            <div class="col-md-6">
+                                <div class="p-3 bg-light rounded">
+                                    <h5 class="fw-bold mb-3">
+                                        <i class="bi bi-key me-2"></i>Тестовый доступ
+                                    </h5>
+                                    <div class="mb-3">
+                                        <div class="text-muted small mb-1">Имя пользователя</div>
+                                        <div class="p-2 bg-white rounded border">
+                                            <code>admin</code>
+                                        </div>
+                                    </div>
+                                    <div class="mb-4">
+                                        <div class="text-muted small mb-1">Пароль</div>
+                                        <div class="p-2 bg-white rounded border">
+                                            <code>admin</code>
+                                        </div>
+                                    </div>
+
+                                    {% if user.is_authenticated %}
+                                        <div class="alert alert-success">
+                                            <i class="bi bi-check-circle me-2"></i>
+                                            Вы уже вошли как {{ user.username }}
+                                        </div>
+                                        <a href="/tasks/" class="btn btn-primary w-100">
+                                            Перейти к задачам
+                                        </a>
+                                    {% else %}
+                                        <a href="{% url 'login' %}" class="btn btn-primary w-100">
+                                            <i class="bi bi-box-arrow-in-right me-2"></i>
+                                            Войти с этими данными
+                                        </a>
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <div class="p-3">
+                                    <h5 class="fw-bold mb-3">
+                                        <i class="bi bi-info-circle me-2"></i>Как начать
+                                    </h5>
+                                    <div class="d-flex align-items-start mb-3">
+                                        <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center"
+                                             style="width: 30px; height: 30px; min-width: 30px;">
+                                            1
+                                        </div>
+                                        <div class="ms-3">
+                                            <div class="fw-medium">Войдите в систему</div>
+                                            <small class="text-muted">Используйте тестовый аккаунт</small>
+                                        </div>
+                                    </div>
+
+                                    <div class="d-flex align-items-start mb-3">
+                                        <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center"
+                                             style="width: 30px; height: 30px; min-width: 30px;">
+                                            2
+                                        </div>
+                                        <div class="ms-3">
+                                            <div class="fw-medium">Создайте первую задачу</div>
+                                            <small class="text-muted">Нажмите "Создать новую задачу"</small>
+                                        </div>
+                                    </div>
+
+                                    <div class="d-flex align-items-start">
+                                        <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center"
+                                             style="width: 30px; height: 30px; min-width: 30px;">
+                                            3
+                                        </div>
+                                        <div class="ms-3">
+                                            <div class="fw-medium">Организуйте работу</div>
+                                            <small class="text-muted">Используйте метки и приоритеты</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Футер -->
+    <footer>
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-4 mb-4">
+                    <a href="/" class="logo text-white mb-3">
+                        <i class="bi bi-check2-circle"></i>
+                        <span>TaskFlow</span>
+                    </a>
+                    <p class="text-muted mb-4">
+                        Простой и эффективный инструмент для управления задачами.
+                        Бесплатно для личного использования.
+                    </p>
+                </div>
+
+                <div class="col-lg-2 col-md-4 mb-4">
+                    <h5 class="mb-3">Продукт</h5>
+                    <ul class="list-unstyled footer-links">
+                        <li class="mb-2"><a href="#features">Возможности</a></li>
+                        <li class="mb-2"><a href="#demo">Попробовать</a></li>
+                        {% if user.is_authenticated %}
+                            <li class="mb-2"><a href="/tasks/">Мои задачи</a></li>
+                        {% endif %}
+                    </ul>
+                </div>
+
+                <div class="col-lg-2 col-md-4 mb-4">
+                    <h5 class="mb-3">Аккаунт</h5>
+                    <ul class="list-unstyled footer-links">
+                        {% if user.is_authenticated %}
+                            <li class="mb-2"><a href="{% url 'logout' %}">Выйти</a></li>
+                        {% else %}
+                            <li class="mb-2"><a href="{% url 'login' %}">Войти</a></li>
+                        {% endif %}
+                        <li class="mb-2"><a href="/admin/">Админка</a></li>
+                    </ul>
+                </div>
+
+                <div class="col-lg-4 col-md-4 mb-4">
+                    <h5 class="mb-3">Технологии</h5>
+                    <div class="text-muted small mb-3">
+                        Разработано с использованием Django, Bootstrap 5 и современных веб-технологий.
+                    </div>
+                    <div class="d-flex gap-3">
+                        <a href="#" class="text-white"><i class="bi bi-github fs-5"></i></a>
+                        <a href="#" class="text-white"><i class="bi bi-telegram fs-5"></i></a>
+                    </div>
+                </div>
+            </div>
+
+            <hr class="border-secondary my-4">
+
+            <div class="text-center text-muted">
+                <div class="mb-2">© 2023 TaskFlow. Система управления задачами.</div>
+                <div class="small">Для личного использования и образовательных целей.</div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Простая анимация для карточек при прокрутке
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if(entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        }, observerOptions);
+
+        // Наблюдаем за карточками особенностей
+        document.querySelectorAll('.feature-card').forEach(card => {
+            card.style.opacity = '0';
+            card.style.transform = 'translateY(20px)';
+            card.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+            observer.observe(card);
+        });
+
+        // Плавная прокрутка к якорям
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            if(anchor.getAttribute('href') === '#') return;
+
+            anchor.addEventListener('click', function(e) {
+                e.preventDefault();
+
+                const targetId = this.getAttribute('href');
+                const targetElement = document.querySelector(targetId);
+
+                if(targetElement) {
+                    window.scrollTo({
+                        top: targetElement.offsetTop - 80,
+                        behavior: 'smooth'
+                    });
+                }
+            });
+        });
+    </script>
+</body>
+</html>
