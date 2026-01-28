@@ -1,6 +1,8 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
-from .forms import TaskForm
+from django.views.decorators.http import require_http_methods
+from django.contrib.auth import login as auth_login
+from .forms import TaskForm, RegisterForm
 from .models import Task
 
 # Create your views here.
@@ -22,6 +24,7 @@ def task_list(request):
 
     return render(request, 'todo/task_list.html', {'tasks': tasks})
 
+@login_required
 def create_task(request):
     if request.method == 'POST':
         # Берем данные из формы
@@ -53,11 +56,22 @@ def create_task(request):
         # Если GET запрос или ошибка - возвращаем на список
     return redirect('task_list')
 
-
+@require_http_methods(["POST"])
 def delete_task(request, task_id):
-    task = get_object_or_404(Task, id=task_id)
-    if request.method == 'POST':
-        task.delete()
-        return redirect('task_list')
+    task = get_object_or_404(Task, id=task_id, user=request.user)
+    task.delete()
     return redirect('task_list')
+
+def register(request):
+    if request.method == 'POST':
+        form = RegisterForm(request.POST)
+        if form.is_valid():
+            user = form.save()
+            auth_login(request, user)
+            return redirect('task_list')
+        else:
+            form = RegisterForm()
+    else:
+        form = RegisterForm()
+    return render(request, 'registration/register.html', {'form': form})
 

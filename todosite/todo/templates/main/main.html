@@ -257,6 +257,7 @@
                                 </button>
                             </form>
                     {% else %}
+                        <a href="{% url 'register' %}" class="btn btn-outline-secondary">Регистрация</a>
                         <a href="{% url 'login' %}" class="btn btn-primary">Войти</a>
                     {% endif %}
                 </div>
