@@ -251,7 +251,11 @@
                 <div class="d-flex align-items-center gap-3">
                     {% if user.is_authenticated %}
                         <span class="text-muted">Привет, {{ user.username }}!</span>
-                        <a href="{% url 'logout' %}" class="btn btn-outline-primary btn-sm">Выйти</a>
+                            <form method="post" action="{% url 'logout' %}" class="m-0">{% csrf_token %}
+                                <button type="submit" class="btn btn-outline-primary btn-sm">
+                                    <i class="bi bi-box-arrow-right"></i> Выйти
+                                </button>
+                            </form>
                     {% else %}
                         <a href="{% url 'login' %}" class="btn btn-primary">Войти</a>
                     {% endif %}
@@ -273,7 +277,7 @@
 
                     <div class="d-flex flex-wrap gap-3 mb-4">
                         {% if user.is_authenticated %}
-                            <a href="/tasks/" class="btn btn-primary btn-lg">
+                            <a href="{% url 'task_list' %}" class="btn btn-primary btn-lg">
                                 <i class="bi bi-arrow-right me-2"></i>К моим задачам
                             </a>
                         {% else %}
@@ -431,101 +435,6 @@
         </div>
     </section>
 
-    <!-- Демо-секция -->
-    <section id="demo" class="demo-section">
-        <div class="container">
-            <div class="row justify-content-center">
-                <div class="col-lg-8">
-                    <div class="demo-card">
-                        <div class="text-center mb-4">
-                            <h2 class="section-title text-center">Попробуйте прямо сейчас</h2>
-                            <p class="section-subtitle text-center mx-auto">
-                                Используйте тестовый аккаунт, чтобы оценить все возможности
-                            </p>
-                        </div>
-
-                        <div class="row g-4">
-                            <div class="col-md-6">
-                                <div class="p-3 bg-light rounded">
-                                    <h5 class="fw-bold mb-3">
-                                        <i class="bi bi-key me-2"></i>Тестовый доступ
-                                    </h5>
-                                    <div class="mb-3">
-                                        <div class="text-muted small mb-1">Имя пользователя</div>
-                                        <div class="p-2 bg-white rounded border">
-                                            <code>admin</code>
-                                        </div>
-                                    </div>
-                                    <div class="mb-4">
-                                        <div class="text-muted small mb-1">Пароль</div>
-                                        <div class="p-2 bg-white rounded border">
-                                            <code>admin</code>
-                                        </div>
-                                    </div>
-
-                                    {% if user.is_authenticated %}
-                                        <div class="alert alert-success">
-                                            <i class="bi bi-check-circle me-2"></i>
-                                            Вы уже вошли как {{ user.username }}
-                                        </div>
-                                        <a href="/tasks/" class="btn btn-primary w-100">
-                                            Перейти к задачам
-                                        </a>
-                                    {% else %}
-                                        <a href="{% url 'login' %}" class="btn btn-primary w-100">
-                                            <i class="bi bi-box-arrow-in-right me-2"></i>
-                                            Войти с этими данными
-                                        </a>
-                                    {% endif %}
-                                </div>
-                            </div>
-
-                            <div class="col-md-6">
-                                <div class="p-3">
-                                    <h5 class="fw-bold mb-3">
-                                        <i class="bi bi-info-circle me-2"></i>Как начать
-                                    </h5>
-                                    <div class="d-flex align-items-start mb-3">
-                                        <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center"
-                                             style="width: 30px; height: 30px; min-width: 30px;">
-                                            1
-                                        </div>
-                                        <div class="ms-3">
-                                            <div class="fw-medium">Войдите в систему</div>
-                                            <small class="text-muted">Используйте тестовый аккаунт</small>
-                                        </div>
-                                    </div>
-
-                                    <div class="d-flex align-items-start mb-3">
-                                        <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center"
-                                             style="width: 30px; height: 30px; min-width: 30px;">
-                                            2
-                                        </div>
-                                        <div class="ms-3">
-                                            <div class="fw-medium">Создайте первую задачу</div>
-                                            <small class="text-muted">Нажмите "Создать новую задачу"</small>
-                                        </div>
-                                    </div>
-
-                                    <div class="d-flex align-items-start">
-                                        <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center"
-                                             style="width: 30px; height: 30px; min-width: 30px;">
-                                            3
-                                        </div>
-                                        <div class="ms-3">
-                                            <div class="fw-medium">Организуйте работу</div>
-                                            <small class="text-muted">Используйте метки и приоритеты</small>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
     <!-- Футер -->
     <footer>
         <div class="container">
@@ -556,11 +465,15 @@
                     <h5 class="mb-3">Аккаунт</h5>
                     <ul class="list-unstyled footer-links">
                         {% if user.is_authenticated %}
-                            <li class="mb-2"><a href="{% url 'logout' %}">Выйти</a></li>
+                            <form method="post" action="{% url 'logout' %}" class="m-0">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-outline-danger btn-sm ms-2">
+                                    <i class="bi bi-box-arrow-right"></i> Выйти
+                                </button>
+                            </form>
                         {% else %}
                             <li class="mb-2"><a href="{% url 'login' %}">Войти</a></li>
                         {% endif %}
-                        <li class="mb-2"><a href="/admin/">Админка</a></li>
                     </ul>
                 </div>
 
