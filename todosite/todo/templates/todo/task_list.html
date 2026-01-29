@@ -7,13 +7,144 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
     <style>
         .card { border-radius: 12px; }
-        .text-line-clamp {
-            display: -webkit-box;
-            -webkit-box-orient: vertical;
-            overflow: hidden;
+        .task-item {
+            padding: 0.75rem 0;
+            border-bottom: 1px solid #e9ecef;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            cursor: pointer;
+            transition: background-color 0.2s;
         }
-        .text-line-clamp-5 {
-            -webkit-line-clamp: 5;
+
+        .task-item:hover {
+            background-color: #f8f9fa;
+        }
+
+        .task-item:last-child {
+            border-bottom: none;
+        }
+
+        .badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .badge-high {
+            background: #ffeaea;
+            color: #dc3545;
+        }
+
+        .badge-medium {
+            background: #fff3cd;
+            color: #ffc107;
+        }
+
+        .badge-low {
+            background: #d1e7dd;
+            color: #198754;
+        }
+
+        .task-title-clickable {
+            cursor: pointer;
+            color: #0d6efd;
+            transition: color 0.2s;
+        }
+
+        .task-title-clickable:hover {
+            color: #0a58ca;
+            text-decoration: underline;
+        }
+
+        .modal-lg-custom {
+            max-width: 700px;
+        }
+
+        .form-check-label {
+            cursor: pointer;
+        }
+
+        .search-container {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+
+        .filter-btn {
+            border-radius: 8px;
+            padding: 0.5rem 1rem;
+            font-size: 0.875rem;
+        }
+
+        .active-filter {
+            background: #0d6efd !important;
+            color: white !important;
+            border-color: #0d6efd !important;
+        }
+
+        .status-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 6px;
+        }
+
+        .status-dot-completed {
+            background-color: #198754;
+        }
+
+        .status-dot-pending {
+            background-color: #6c757d;
+        }
+
+        .status-dot-overdue {
+            background-color: #dc3545;
+        }
+
+        .filter-badge {
+            background: #e9ecef;
+            border: none;
+            border-radius: 20px;
+            padding: 0.375rem 0.75rem;
+            font-size: 0.875rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .task-item.hidden {
+            display: none !important;
+        }
+
+        .no-tasks {
+            text-align: center;
+            padding: 3rem 1rem;
+            color: #6c757d;
+        }
+
+        .priority-indicator {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            margin-right: 6px;
+        }
+
+        .priority-high {
+            background-color: #dc3545;
+        }
+
+        .priority-medium {
+            background-color: #ffc107;
+        }
+
+        .priority-low {
+            background-color: #198754;
         }
     </style>
 </head>
@@ -21,20 +152,17 @@
     <header class="border-bottom shadow-sm bg-white py-3 mb-4">
         <div class="container">
             <div class="d-flex justify-content-between align-items-center">
-                <!-- Левая часть: Заголовок и иконка -->
                 <div class="d-flex align-items-center gap-3">
                     <div class="bg-primary bg-gradient rounded-circle p-2 d-flex align-items-center justify-content-center shadow-sm" style="width: 48px; height: 48px;">
                         <i class="bi bi-check2-circle fs-4 text-white"></i>
                     </div>
                     <div>
-                        <h1 class="h3 mb-0 fw-bold text-dark">Мои Задачи</h1>
+                        <h1 class="h3 mb-0 fw-bold text-dark">BlueToDO</h1>
                         <p class="text-muted small mb-0">Управление вашими задачами</p>
                     </div>
                 </div>
 
-                <!-- Правая часть: Кнопка и блок пользователя -->
                 <div class="d-flex align-items-center gap-3">
-                    <!-- Блок пользователя -->
                     <div class="d-flex align-items-center gap-2">
                         {% if user.is_authenticated %}
                             <div class="d-flex align-items-center gap-2 p-2 border rounded-3">
@@ -58,7 +186,6 @@
                         {% endif %}
                     </div>
 
-                    <!-- Кнопка создания задачи -->
                     <button type="button" class="btn btn-primary btn-lg shadow-sm d-flex align-items-center gap-2 fw-medium" data-bs-toggle="modal" data-bs-target="#createTaskModal">
                         <i class="bi bi-plus-circle"></i>
                         <span class="d-none d-md-inline">Создать задачу</span>
@@ -69,74 +196,176 @@
     </header>
 
     <div class="container">
-        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
-            {% for task in tasks %}
-                <div class="col">
-                    <div class="card border-start" style="height: 14rem;">
-                        <div class="card-body d-flex flex-column">
-                            <div class="mb-2">
-                                <h5 class="card-title text-truncate">{{ task.title }}</h5>
-                                <p class="card-text text-line-clamp text-line-clamp-5">{{ task.description }}</p>
-                            </div>
-
-                            <div class="mt-auto">
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <div>
-                                        {% if task.due_date %}
-                                            <p class="d-inline">Срок выполнения:</p>
-                                            <span class="{% if task.is_overdue %}text-danger fw-bold{% elif task.due_date == today %}text-warning fw-bold{% endif %}">
-                                                <i class="bi bi-calendar-event me-1"></i>
-                                                {{ task.due_date|date:"d.m.Y" }}
-                                                {% if task.due_time %}
-                                                в {{ task.due_time|time:"H:i" }}
-                                                {% endif %}
-                                            </span>
-                                        {% else %}
-                                            <span class="text-muted"> </span>
-                                        {% endif %}
-                                    </div>
-
-                                    <div>
-                                        <form method="post" action="{% url 'delete_task' task.id %}">
-                                            {% csrf_token %}
-                                            <button type="submit" class="btn btn-danger btn-sm">
-                                                <i class="bi bi-trash"></i> Удалить
-                                            </button>
-                                        </form>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+        <!-- Панель поиска и фильтров -->
+        <div class="search-container">
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <div class="input-group">
+                        <span class="input-group-text bg-light border-end-0">
+                            <i class="bi bi-search"></i>
+                        </span>
+                        <input type="text"
+                               class="form-control border-start-0"
+                               id="searchInput"
+                               placeholder="Поиск по названию и описанию...">
+                        <button class="btn btn-outline-secondary" type="button" id="clearSearch">
+                            <i class="bi bi-x"></i>
+                        </button>
                     </div>
                 </div>
+                <div class="col-md-6">
+                    <div class="d-flex gap-2 flex-wrap">
+                        <span class="text-muted align-self-center me-2 d-none d-md-block">Фильтры:</span>
+                        <button class="btn btn-outline-primary filter-btn" data-filter="all">
+                            <i class="bi bi-list-check"></i> Все
+                        </button>
+                        <button class="btn btn-outline-primary filter-btn" data-filter="pending">
+                            <i class="bi bi-clock"></i> Активные
+                        </button>
+                        <button class="btn btn-outline-primary filter-btn" data-filter="completed">
+                            <i class="bi bi-check-circle"></i> Выполненные
+                        </button>
+                        <button class="btn btn-outline-primary filter-btn" data-filter="today">
+                            <i class="bi bi-calendar-day"></i> Сегодня
+                        </button>
+                        <button class="btn btn-outline-primary filter-btn" data-filter="high">
+                            <i class="bi bi-exclamation-triangle"></i> Высокий
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Активные фильтры -->
+            <div class="d-flex align-items-center flex-wrap gap-2" id="activeFilters">
+                <small class="text-muted me-2">Активные фильтры:</small>
+            </div>
+        </div>
+
+        <!-- Список задач -->
+        <div class="task-list" id="tasksContainer">
+            {% for task in tasks %}
+                <div class="task-item"
+                     data-task-id="{{ task.id }}"
+                     data-task-title="{{ task.title|lower }}"
+                     data-task-description="{{ task.description|lower }}"
+                     data-task-completed="{{ task.completed|yesno:'true,false' }}"
+                     data-task-due-date="{{ task.due_date|date:'Y-m-d'|default:'' }}"
+                     data-task-due-time="{{ task.due_time|time:'H:i'|default:'' }}"
+                     data-task-priority="{{ task.priority|default:'MEDIUM' }}">
+                    {% if task.completed %}
+                        <i class="bi bi-check-circle-fill text-success"></i>
+                    {% else %}
+                        {% if task.due_date and task.due_date < today %}
+                            <i class="bi bi-exclamation-circle-fill text-danger"></i>
+                        {% else %}
+                            <i class="bi bi-circle text-primary"></i>
+                        {% endif %}
+                    {% endif %}
+                    <div class="flex-grow-1">
+                        <div class="task-title-clickable fw-medium"
+                             data-bs-toggle="modal"
+                             data-bs-target="#viewTaskModal"
+                             data-task-id="{{ task.id }}"
+                             data-task-title="{{ task.title }}"
+                             data-task-description="{{ task.description }}"
+                             data-task-completed="{{ task.completed|yesno:'true,false' }}"
+                             data-task-priority="{{ task.priority|default:'MEDIUM' }}"
+                             data-task-due-date="{{ task.due_date|date:'Y-m-d'|default:'' }}"
+                             data-task-due-time="{{ task.due_time|time:'H:i'|default:'' }}">
+                            {{ task.title }}
+                        </div>
+                        <div class="d-flex align-items-center gap-2 mt-1">
+                            {% if task.completed %}
+                                <span class="status-dot status-dot-completed"></span>
+                                <small class="text-success">Выполнено</small>
+                            {% else %}
+                                {% if task.due_date and task.due_date < today %}
+                                    <span class="status-dot status-dot-overdue"></span>
+                                    <small class="text-danger">Просрочено</small>
+                                {% else %}
+                                    <span class="status-dot status-dot-pending"></span>
+                                    <small class="text-muted">В процессе</small>
+                                {% endif %}
+                            {% endif %}
+
+                            {% if task.due_date %}
+                                <small class="text-muted">•</small>
+                                <small class="text-muted">
+                                    <i class="bi bi-calendar"></i>
+                                    {{ task.due_date|date:"d.m.Y" }}
+                                    {% if task.due_time %}
+                                        , {{ task.due_time|time:"H:i" }}
+                                    {% endif %}
+                                </small>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% if task.priority == 'HIGH' %}
+                        <span class="badge badge-high">
+                            <span class="priority-indicator priority-high"></span>
+                            Высокий
+                        </span>
+                    {% elif task.priority == 'MEDIUM' %}
+                        <span class="badge badge-medium">
+                            <span class="priority-indicator priority-medium"></span>
+                            Средний
+                        </span>
+                    {% elif task.priority == 'LOW' %}
+                        <span class="badge badge-low">
+                            <span class="priority-indicator priority-low"></span>
+                            Низкий
+                        </span>
+                    {% else %}
+                        <span class="badge badge-medium">
+                            <span class="priority-indicator priority-medium"></span>
+                            Средний
+                        </span>
+                    {% endif %}
+                </div>
             {% empty %}
-                <div class="col-12">
-                    <p class="h2 text-center">Задач пока нет.</p>
+                <div class="no-tasks">
+                    <i class="bi bi-clipboard-x display-1 text-muted mb-3"></i>
+                    <p class="h4 text-muted mb-2">Задач пока нет</p>
+                    <p class="text-muted">Создайте свою первую задачу, нажав кнопку "Создать задачу"</p>
                 </div>
             {% endfor %}
         </div>
+
+        <!-- Счетчик задач -->
+        <div class="mt-3 text-end">
+            <small class="text-muted">
+                Показано: <span id="visibleTasksCount">0</span> из <span id="totalTasksCount">0</span> задач
+            </small>
+        </div>
     </div>
 
+    <!-- Модальное окно для создания задачи -->
     <div class="modal fade" id="createTaskModal" tabindex="-1">
         <div class="modal-dialog">
             <div class="modal-content">
-                <!-- Заголовок модального окна -->
                 <div class="modal-header">
                     <h5 class="modal-title">Создать новую задачу</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
 
-                <!-- Форма в модальном окне -->
                 <form method="post" action="{% url 'create_task' %}">
                     {% csrf_token %}
                     <div class="modal-body">
                         <div class="mb-3">
-                            <label for="id_title" class="form-label">Заголовок</label>
+                            <label for="id_title" class="form-label">Заголовок <span class="text-danger">*</span></label>
                             <input type="text" class="form-control" id="id_title" name="title" required>
                         </div>
                         <div class="mb-3">
                             <label for="id_description" class="form-label">Описание</label>
                             <textarea class="form-control" id="id_description" name="description" rows="3"></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label for="id_priority" class="form-label">Приоритет</label>
+                            <select class="form-select" id="id_priority" name="priority">
+                                <option value="LOW">Низкий</option>
+                                <option value="MEDIUM" selected>Средний</option>
+                                <option value="HIGH">Высокий</option>
+                            </select>
                         </div>
                         <div class="mb-3 form-check">
                             <input type="checkbox" class="form-check-input" id="id_completed" name="completed">
@@ -146,8 +375,7 @@
                             <div class="col-md-6">
                                 <div class="mb-3">
                                     <label for="id_due_date" class="form-label">Срок выполнения</label>
-                                    <input type="date" class="form-control" id="id_due_date" name="due_date"
-                                           min="{{ today|date:'Y-m-d' }}">
+                                    <input type="date" class="form-control" id="id_due_date" name="due_date">
                                     <div class="form-text">Укажите дату, до которой нужно выполнить задачу</div>
                                 </div>
                             </div>
@@ -161,7 +389,6 @@
                         </div>
                     </div>
 
-                    <!-- Кнопки модального окна -->
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
                         <button type="submit" class="btn btn-primary">Сохранить задачу</button>
@@ -170,5 +397,371 @@
             </div>
         </div>
     </div>
+
+    <!-- Модальное окно для просмотра и редактирования задачи -->
+    <div class="modal fade" id="viewTaskModal" tabindex="-1">
+        <div class="modal-dialog modal-lg modal-lg-custom">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Просмотр и редактирование задачи</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+
+                <form id="editTaskForm" method="post" action="">
+                    {% csrf_token %}
+                    <div class="modal-body">
+                        <input type="hidden" id="edit_task_id" name="task_id">
+
+                        <div class="mb-3">
+                            <label for="edit_title" class="form-label">Заголовок <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="edit_title" name="title" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="edit_description" class="form-label">Описание</label>
+                            <textarea class="form-control" id="edit_description" name="description" rows="5"></textarea>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="edit_priority" class="form-label">Приоритет</label>
+                            <select class="form-select" id="edit_priority" name="priority">
+                                <option value="LOW">Низкий</option>
+                                <option value="MEDIUM">Средний</option>
+                                <option value="HIGH">Высокий</option>
+                            </select>
+                        </div>
+
+                        <div class="mb-3 form-check">
+                            <input type="checkbox" class="form-check-input" id="edit_completed" name="completed">
+                            <label class="form-check-label" for="edit_completed">Выполнено</label>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="edit_due_date" class="form-label">Срок выполнения</label>
+                                    <input type="date" class="form-control" id="edit_due_date" name="due_date">
+                                    <div class="form-text">Укажите дату, до которой нужно выполнить задачу</div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="edit_due_time" class="form-label">Время выполнения</label>
+                                    <input type="time" class="form-control" id="edit_due_time" name="due_time">
+                                    <div class="form-text">Укажите время (необязательно)</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="modal-footer justify-content-between">
+                        <!-- Левая часть: кнопка удаления -->
+                        <div>
+                            <button type="button" class="btn btn-danger" onclick="confirmDelete()">
+                                <i class="bi bi-trash"></i> Удалить задачу
+                            </button>
+                        </div>
+
+                        <!-- Правая часть: кнопки отмены и сохранения -->
+                        <div>
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                            <button type="submit" class="btn btn-primary">Сохранить изменения</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Модальное окно подтверждения удаления -->
+    <div class="modal fade" id="confirmDeleteModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title text-danger">Подтверждение удаления</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Вы уверены, что хотите удалить эту задачу? Это действие нельзя отменить.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                    <form id="deleteTaskForm" method="post" action="" style="display: inline;">
+                        {% csrf_token %}
+                        <input type="hidden" id="delete_task_id" name="task_id">
+                        <button type="submit" class="btn btn-danger">Удалить</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Обработчик открытия модального окна с задачей
+        document.addEventListener('DOMContentLoaded', function() {
+            const viewTaskModal = document.getElementById('viewTaskModal');
+
+            viewTaskModal.addEventListener('show.bs.modal', function(event) {
+                const button = event.relatedTarget;
+
+                // Извлекаем данные из data-* атрибутов
+                const taskId = button.getAttribute('data-task-id');
+                const taskTitle = button.getAttribute('data-task-title');
+                const taskDescription = button.getAttribute('data-task-description');
+                const taskCompleted = button.getAttribute('data-task-completed') === 'true';
+                const taskPriority = button.getAttribute('data-task-priority');
+                const taskDueDate = button.getAttribute('data-task-due-date');
+                const taskDueTime = button.getAttribute('data-task-due-time');
+
+                // Заполняем форму редактирования
+                document.getElementById('edit_task_id').value = taskId;
+                document.getElementById('delete_task_id').value = taskId;
+                document.getElementById('edit_title').value = taskTitle;
+                document.getElementById('edit_description').value = taskDescription;
+                document.getElementById('edit_priority').value = taskPriority;
+                document.getElementById('edit_completed').checked = taskCompleted;
+                document.getElementById('edit_due_date').value = taskDueDate;
+                document.getElementById('edit_due_time').value = taskDueTime;
+
+                // Устанавливаем action для форм
+                document.getElementById('editTaskForm').action = `/update/${taskId}/`;
+                document.getElementById('deleteTaskForm').action = `/delete/${taskId}/`;
+            });
+
+            // Инициализация системы поиска и фильтрации
+            initSearchAndFilter();
+        });
+
+        // Функция подтверждения удаления
+        function confirmDelete() {
+            const deleteModal = new bootstrap.Modal(document.getElementById('confirmDeleteModal'));
+            deleteModal.show();
+        }
+
+        // Система поиска и фильтрации
+        function initSearchAndFilter() {
+            const searchInput = document.getElementById('searchInput');
+            const clearSearchBtn = document.getElementById('clearSearch');
+            const filterButtons = document.querySelectorAll('.filter-btn');
+            const activeFiltersContainer = document.getElementById('activeFilters');
+            const taskItems = document.querySelectorAll('.task-item');
+            const totalTasksCount = document.getElementById('totalTasksCount');
+
+            let activeFilters = {
+                search: '',
+                status: 'all',
+                priority: 'all',
+                date: 'all'
+            };
+
+            // Устанавливаем общее количество задач
+            totalTasksCount.textContent = taskItems.length;
+
+            // Функция обновления счетчика видимых задач
+            function updateVisibleTasksCount() {
+                const visibleTasks = document.querySelectorAll('.task-item:not(.hidden)').length;
+                document.getElementById('visibleTasksCount').textContent = visibleTasks;
+            }
+
+            // Функция фильтрации задач
+            function filterTasks() {
+                const today = new Date().toISOString().split('T')[0];
+
+                taskItems.forEach(task => {
+                    let isVisible = true;
+
+                    // Фильтр по поиску
+                    if (activeFilters.search) {
+                        const title = task.getAttribute('data-task-title');
+                        const description = task.getAttribute('data-task-description');
+                        const searchTerm = activeFilters.search.toLowerCase();
+
+                        if (!title.includes(searchTerm) && !description.includes(searchTerm)) {
+                            isVisible = false;
+                        }
+                    }
+
+                    // Фильтр по статусу
+                    if (activeFilters.status !== 'all') {
+                        const completed = task.getAttribute('data-task-completed');
+                        if (activeFilters.status === 'completed' && completed !== 'true') {
+                            isVisible = false;
+                        }
+                        if (activeFilters.status === 'pending' && completed === 'true') {
+                            isVisible = false;
+                        }
+                    }
+
+                    // Фильтр по приоритету
+                    if (activeFilters.priority !== 'all') {
+                        const priority = task.getAttribute('data-task-priority');
+                        if (activeFilters.priority !== priority.toLowerCase()) {
+                            isVisible = false;
+                        }
+                    }
+
+                    // Фильтр по дате
+                    if (activeFilters.date !== 'all') {
+                        const dueDate = task.getAttribute('data-task-due-date');
+                        if (activeFilters.date === 'today' && dueDate !== today) {
+                            isVisible = false;
+                        }
+                    }
+
+                    // Применение видимости
+                    if (isVisible) {
+                        task.classList.remove('hidden');
+                    } else {
+                        task.classList.add('hidden');
+                    }
+                });
+
+                updateVisibleTasksCount();
+                updateActiveFiltersDisplay();
+            }
+
+            // Функция обновления отображения активных фильтров
+            function updateActiveFiltersDisplay() {
+                activeFiltersContainer.innerHTML = '<small class="text-muted me-2">Активные фильтры:</small>';
+
+                if (activeFilters.search) {
+                    const badge = createFilterBadge(`Поиск: "${activeFilters.search}"`, 'search');
+                    activeFiltersContainer.appendChild(badge);
+                }
+
+                if (activeFilters.status !== 'all') {
+                    const statusText = activeFilters.status === 'completed' ? 'Выполненные' : 'Активные';
+                    const badge = createFilterBadge(statusText, 'status');
+                    activeFiltersContainer.appendChild(badge);
+                }
+
+                if (activeFilters.priority !== 'all') {
+                    const priorityText = activeFilters.priority === 'high' ? 'Высокий приоритет' :
+                                       activeFilters.priority === 'medium' ? 'Средний приоритет' : 'Низкий приоритет';
+                    const badge = createFilterBadge(priorityText, 'priority');
+                    activeFiltersContainer.appendChild(badge);
+                }
+
+                if (activeFilters.date !== 'all') {
+                    const dateText = activeFilters.date === 'today' ? 'Сегодня' : 'Все';
+                    const badge = createFilterBadge(dateText, 'date');
+                    activeFiltersContainer.appendChild(badge);
+                }
+
+                // Показать "Все" если нет активных фильтров
+                if (!activeFilters.search && activeFilters.status === 'all' &&
+                    activeFilters.priority === 'all' && activeFilters.date === 'all') {
+                    const badge = createFilterBadge('Все задачи', 'all');
+                    activeFiltersContainer.appendChild(badge);
+                }
+            }
+
+            // Функция создания бейджа фильтра
+            function createFilterBadge(text, type) {
+                const badge = document.createElement('button');
+                badge.className = 'filter-badge btn btn-sm';
+                badge.innerHTML = `
+                    ${text}
+                    <i class="bi bi-x" data-filter-type="${type}"></i>
+                `;
+
+                badge.addEventListener('click', function(e) {
+                    if (e.target.closest('.bi-x')) {
+                        e.stopPropagation();
+                        removeFilter(type);
+                    }
+                });
+
+                return badge;
+            }
+
+            // Функция удаления фильтра
+            function removeFilter(type) {
+                switch(type) {
+                    case 'search':
+                        activeFilters.search = '';
+                        searchInput.value = '';
+                        break;
+                    case 'status':
+                        activeFilters.status = 'all';
+                        document.querySelector('[data-filter="all"]').classList.add('active-filter');
+                        filterButtons.forEach(btn => {
+                            if (btn.dataset.filter !== 'all') {
+                                btn.classList.remove('active-filter');
+                            }
+                        });
+                        break;
+                    case 'priority':
+                        activeFilters.priority = 'all';
+                        break;
+                    case 'date':
+                        activeFilters.date = 'all';
+                        break;
+                }
+
+                filterTasks();
+            }
+
+            // Обработчик поиска
+            searchInput.addEventListener('input', function() {
+                activeFilters.search = this.value.trim();
+                filterTasks();
+            });
+
+            // Очистка поиска
+            clearSearchBtn.addEventListener('click', function() {
+                searchInput.value = '';
+                activeFilters.search = '';
+                filterTasks();
+            });
+
+            // Обработчики кнопок фильтров
+            filterButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const filter = this.dataset.filter;
+
+                    // Управление активным состоянием кнопок
+                    filterButtons.forEach(btn => btn.classList.remove('active-filter'));
+                    this.classList.add('active-filter');
+
+                    // Установка фильтров
+                    switch(filter) {
+                        case 'all':
+                            activeFilters.status = 'all';
+                            activeFilters.priority = 'all';
+                            activeFilters.date = 'all';
+                            break;
+                        case 'pending':
+                            activeFilters.status = 'pending';
+                            activeFilters.priority = 'all';
+                            activeFilters.date = 'all';
+                            break;
+                        case 'completed':
+                            activeFilters.status = 'completed';
+                            activeFilters.priority = 'all';
+                            activeFilters.date = 'all';
+                            break;
+                        case 'today':
+                            activeFilters.status = 'all';
+                            activeFilters.priority = 'all';
+                            activeFilters.date = 'today';
+                            break;
+                        case 'high':
+                            activeFilters.status = 'all';
+                            activeFilters.priority = 'high';
+                            activeFilters.date = 'all';
+                            break;
+                    }
+
+                    filterTasks();
+                });
+            });
+
+            // Начальная инициализация
+            document.querySelector('[data-filter="all"]').classList.add('active-filter');
+            updateVisibleTasksCount();
+            updateActiveFiltersDisplay();
+        }
+    </script>
 </body>
 </html>

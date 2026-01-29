@@ -33,6 +33,7 @@ def create_task(request):
         completed = request.POST.get('completed') == 'on'
         due_date = request.POST.get('due_date')
         due_time = request.POST.get('due_time')
+        priority = request.POST.get('priority', 'MEDIUM')
 
         # Проверяем, что заголовок есть
         if title:
@@ -42,6 +43,7 @@ def create_task(request):
                 title=title,
                 description=description,
                 completed=completed,
+                priority=priority
             )
 
             # Обрабатываем дату и время, если они есть
@@ -55,6 +57,26 @@ def create_task(request):
 
         # Если GET запрос или ошибка - возвращаем на список
     return redirect('task_list')
+
+@login_required
+def update(request, task_id):
+    if request.method == 'POST':
+        task = get_object_or_404(Task, id=task_id, user=request.user)
+        task.title = request.POST.get('title')
+        task.description = request.POST.get('description', '')
+        task.completed = request.POST.get('completed') == 'on'
+        task.priority = priority = request.POST.get('priority', 'MEDIUM')
+        if request.POST.get('due_date') != '':
+            task.due_date = request.POST.get('due_date')
+        else:
+            task.due_date = None
+        if request.POST.get('due_time') != '':
+            task.due_time = request.POST.get('due_time')
+        else:
+            task.due_date = None
+
+        task.save()
+        return redirect('task_list')
 
 @require_http_methods(["POST"])
 def delete_task(request, task_id):

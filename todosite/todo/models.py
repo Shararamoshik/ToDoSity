@@ -10,6 +10,12 @@ class Task(models.Model):
     description = models.TextField(null=True, blank=True)
     completed = models.BooleanField(default=False)
     create_at = models.DateTimeField(auto_now_add=True)
+    CATEGORY_CHOICES = [
+        ('HIGH', 'Высокий'),
+        ('MEDIUM', 'Средний'),
+        ('LOW', 'Низкий'),
+    ]
+    priority = models.CharField(max_length=100, choices=CATEGORY_CHOICES, null=True)
     due_date = models.DateField(
         null=True,
         blank=True,
